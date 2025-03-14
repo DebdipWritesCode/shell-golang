@@ -34,19 +34,19 @@ func commandIdentifier(command string) {
 		}
 	}
 
-	if firstCommand == "exit" {
+	if firstCommand == "exit" && outputFile == "" {
 		handleExit(splittedCommands)
 		return
-	} else if firstCommand == "echo" {
+	} else if firstCommand == "echo" && outputFile == "" {
 		handleEcho(splittedCommands)
 		return
-	} else if firstCommand == "type" {
+	} else if firstCommand == "type" && outputFile == "" {
 		handleType(splittedCommands)
 		return
-	} else if firstCommand == "pwd" {
+	} else if firstCommand == "pwd" && outputFile == "" {
 		handlePwd()
 		return
-	} else if firstCommand == "cd" {
+	} else if firstCommand == "cd" && outputFile == "" {
 		handleCd(splittedCommands)
 		return
 	} else {
