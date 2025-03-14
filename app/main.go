@@ -57,6 +57,7 @@ func handleType(commands []string) {
 		"echo",
 		"exit",
 		"type",
+		"pwd",
 	}
 
 	commandToType := strings.Join(commands, " ")[5:]
