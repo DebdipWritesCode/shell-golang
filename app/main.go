@@ -200,7 +200,7 @@ func handleExternalCommands(commands []string, redirectionInfo RedirectionInfo) 
 	}
 
 	if err := cmd.Run(); err != nil {
-		output := "Error executing " + commands[0] + ": " + err.Error()
+		output := err.Error()
 		handleOutput(output, redirectionInfo.outputFile, redirectionInfo, true)
 		return
 	}
