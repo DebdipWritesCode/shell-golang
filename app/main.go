@@ -87,6 +87,12 @@ func handleExit(commands []string, redirectionInfo RedirectionInfo) {
 
 func handleEcho(commands []string, redirectionInfo RedirectionInfo) {
 	totalToPrint := strings.Join(commands, " ")[5:]
+
+	if len(totalToPrint) > 1 && ((totalToPrint[0] == '"' && totalToPrint[len(totalToPrint)-1] == '"') ||
+		(totalToPrint[0] == '\'' && totalToPrint[len(totalToPrint)-1] == '\'')) {
+		totalToPrint = totalToPrint[1 : len(totalToPrint)-1]
+	}
+
 	handleOutput(totalToPrint, redirectionInfo.outputFile, redirectionInfo, false)
 	return
 }
