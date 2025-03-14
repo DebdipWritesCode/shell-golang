@@ -47,7 +47,7 @@ func main() {
 				fmt.Println(commandToType + " is a shell builtin")
 				continue
 			} else {
-				fmt.Println(commandToType + " not found")
+				fmt.Println(commandToType + ": not found")
 			}
 		}
 
