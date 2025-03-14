@@ -182,8 +182,10 @@ func handleExternalCommands(commands []string, redirectionInfo RedirectionInfo) 
 		defer outputFile.Close()
 
 		if redirectionInfo.stdErrRedirect {
+			cmd.Stdout = os.Stdout
 			cmd.Stderr = outputFile // Redirect stderr
 		} else {
+			cmd.Stderr = os.Stderr
 			cmd.Stdout = outputFile // Redirect stdout
 		}
 	} else {
@@ -191,7 +193,6 @@ func handleExternalCommands(commands []string, redirectionInfo RedirectionInfo) 
 		cmd.Stderr = os.Stderr
 	}
 
-	// Execute the command and check for errors
 	if err := cmd.Run(); err != nil {
 		output := "Error executing " + commands[0] + ": " + err.Error()
 		handleOutput(output, redirectionInfo.outputFile, redirectionInfo, true)
