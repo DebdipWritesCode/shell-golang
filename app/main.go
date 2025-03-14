@@ -221,11 +221,11 @@ func handleOutput(output string, outputFile string, redirectionInfo RedirectionI
 		if isError && redirectionInfo.stdErrRedirect {
 			file.WriteString(output + "\n")
 		} else if isError && !redirectionInfo.stdErrRedirect {
-			fmt.Println(output)
+			// fmt.Println(output)
 		} else if !isError && redirectionInfo.appendMode {
 			file.WriteString(output + "\n")
 		} else if !isError && !redirectionInfo.appendMode {
-			fmt.Println(output)
+			// fmt.Println(output)
 		}
 	} else {
 		if isError {
