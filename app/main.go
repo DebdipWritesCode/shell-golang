@@ -94,7 +94,7 @@ func handleCd(commands []string) {
 	}
 
 	targetDir := ""
-	if len(commands) == 1 {
+	if len(commands) == 1 || commands[1] == "~" {
 		targetDir, _ = os.UserHomeDir()
 	} else {
 		targetDir = commands[1]
