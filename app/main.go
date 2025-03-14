@@ -49,6 +49,7 @@ func main() {
 				continue
 			} else if path, err := exec.LookPath(commandToType); err == nil {
 				fmt.Printf("%s is %s\n", command, path)
+				continue
 			} else {
 				fmt.Println(commandToType + ": not found")
 				continue
