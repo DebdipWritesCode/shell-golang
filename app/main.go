@@ -12,16 +12,85 @@ import (
 // Ensures gofmt doesn't remove the "fmt" import in stage 1 (feel free to remove this!)
 var _ = fmt.Fprint
 
-func main() {
-	// Uncomment this block to pass the first stage
+func commandIdentifier(command string) {
+	formattedCommand := command[:len(command)-1]
 
-	// Wait for user input
-	// bufio.NewReader(os.Stdin).ReadString('\n')
+	splittedCommands := strings.Split(formattedCommand, " ")
+	firstCommand := splittedCommands[0]
+
+	if firstCommand == "exit" {
+		handleExit(splittedCommands)
+		return
+	} else if firstCommand == "echo" {
+		handleEcho(splittedCommands)
+		return
+	} else if firstCommand == "type" {
+		handleType(splittedCommands)
+		return
+	} else {
+		handleExternalCommands(splittedCommands)
+		return
+	}
+}
+
+func handleExit(commands []string) {
+	if commands[1] != "0" {
+		fmt.Println("exit: " + commands[1] + ": numeric argument required")
+		os.Exit(2)
+		return
+	}
+	os.Exit(0)
+	return
+}
+
+func handleEcho(commands []string) {
+	totalToPrint := strings.Join(commands, " ")[5:]
+	fmt.Println(totalToPrint)
+	return
+}
+
+func handleType(commands []string) {
 	knownCommands := []string{
 		"echo",
 		"exit",
 		"type",
 	}
+
+	commandToType := strings.Join(commands, " ")[5:]
+	if slices.Contains(knownCommands, commandToType) {
+		fmt.Println(commandToType + " is a shell builtin")
+		return
+	} else if path, err := exec.LookPath(commandToType); err == nil {
+		fmt.Println(commandToType + " is " + path)
+		return
+	} else {
+		fmt.Println(commandToType + ": not found")
+		return
+	}
+}
+
+func handleExternalCommands(commands []string) {
+	path, err := exec.LookPath(commands[0])
+	if err != nil {
+		fmt.Println(commands[0] + ": command not found")
+		return
+	}
+
+	cmd := exec.Command(path, commands[1:]...) // Execute the command with the rest of the arguments
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		fmt.Println("Error executing", commands[0], ":", err)
+		return
+	}
+}
+
+func main() {
+	// Uncomment this block to pass the first stage
+
+	// Wait for user input
+	// bufio.NewReader(os.Stdin).ReadString('\n')
 
 	for {
 		fmt.Fprint(os.Stdout, "$ ")
@@ -31,31 +100,6 @@ func main() {
 			os.Exit(1)
 		}
 
-		formattedCommand := command[:len(command)-1]
-
-		if formattedCommand == "exit 0" {
-			os.Exit(0)
-		}
-
-		firstCommand := strings.Split(formattedCommand, " ")[0]
-
-		if firstCommand == "echo" {
-			fmt.Println(formattedCommand[5:])
-			continue
-		} else if firstCommand == "type" {
-			commandToType := formattedCommand[5:]
-			if slices.Contains(knownCommands, commandToType) {
-				fmt.Println(commandToType + " is a shell builtin")
-				continue
-			} else if path, err := exec.LookPath(commandToType); err == nil {
-				fmt.Println(commandToType + " is " + path)
-				continue
-			} else {
-				fmt.Println(commandToType + ": not found")
-				continue
-			}
-		}
-
-		fmt.Println(formattedCommand + ": command not found")
+		commandIdentifier(command)
 	}
 }
