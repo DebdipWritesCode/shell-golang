@@ -48,6 +48,7 @@ func main() {
 				continue
 			} else {
 				fmt.Println(commandToType + ": not found")
+				continue
 			}
 		}
 
