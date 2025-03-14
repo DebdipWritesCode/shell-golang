@@ -30,6 +30,9 @@ func commandIdentifier(command string) {
 	} else if firstCommand == "pwd" {
 		handlePwd()
 		return
+	} else if firstCommand == "cd" {
+		handleCd(splittedCommands)
+		return
 	} else {
 		handleExternalCommands(splittedCommands)
 		return
@@ -58,6 +61,7 @@ func handleType(commands []string) {
 		"exit",
 		"type",
 		"pwd",
+		"cd",
 	}
 
 	commandToType := strings.Join(commands, " ")[5:]
@@ -81,6 +85,22 @@ func handlePwd() {
 	}
 	fmt.Println(dir)
 	return
+}
+
+func handleCd(commands []string) {
+	if len(commands) > 2 {
+		fmt.Println("cd: too many arguments")
+		return
+	}
+
+	if commands[1][0] == '/' {
+		err := os.Chdir(commands[1])
+		if err != nil {
+			fmt.Println("cd: " + commands[1] + ": No such file or directory")
+			return
+		}
+		return
+	}
 }
 
 func handleExternalCommands(commands []string) {
