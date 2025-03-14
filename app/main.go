@@ -80,7 +80,6 @@ func parseQuotes(command string) []string {
 
 	var result []string
 	var token string
-
 	inSingleQuote, inDoubleQuote := false, false
 
 	for i := 0; i < len(command); i++ {
@@ -90,19 +89,17 @@ func parseQuotes(command string) []string {
 		case '\'':
 			if !inDoubleQuote {
 				inSingleQuote = !inSingleQuote
-			} else {
-				token += string(ch)
+				continue
 			}
 		case '"':
 			if !inSingleQuote {
 				inDoubleQuote = !inDoubleQuote
-			} else {
-				token += string(ch)
+				continue
 			}
 		case ' ':
 			if inSingleQuote || inDoubleQuote {
 				token += string(ch)
-			} else {
+			} else if token != "" {
 				result = append(result, token)
 				token = ""
 			}
@@ -132,11 +129,6 @@ func handleExit(commands []string, redirectionInfo RedirectionInfo) {
 
 func handleEcho(commands []string, redirectionInfo RedirectionInfo) {
 	totalToPrint := strings.Join(commands, " ")[5:]
-
-	if len(totalToPrint) > 1 && ((totalToPrint[0] == '"' && totalToPrint[len(totalToPrint)-1] == '"') ||
-		(totalToPrint[0] == '\'' && totalToPrint[len(totalToPrint)-1] == '\'')) {
-		totalToPrint = totalToPrint[1 : len(totalToPrint)-1]
-	}
 
 	handleOutput(totalToPrint, redirectionInfo.outputFile, redirectionInfo, false)
 	return
