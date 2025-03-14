@@ -59,10 +59,10 @@ func parseRedirect(commands []string) (string, bool, bool, []string) {
 	var stdErrRedirect bool
 
 	for i, arg := range commands {
-		if arg == ">" || arg == "1>" || arg == "2>" || arg == ">>" || arg == "2>>" {
+		if arg == ">" || arg == "1>" || arg == "2>" || arg == ">>" || arg == "1>>" || arg == "2>>" {
 			if i+1 < len(commands) {
 				outputFile = commands[i+1]
-				appendMode = arg == ">>" || arg == "2>>"
+				appendMode = arg == ">>" || arg == "2>>" || arg == "1>>"
 				stdErrRedirect = arg == "2>" || arg == "2>>"
 				commands = commands[:i]
 				break
