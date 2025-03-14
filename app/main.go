@@ -12,52 +12,72 @@ import (
 // Ensures gofmt doesn't remove the "fmt" import in stage 1 (feel free to remove this!)
 var _ = fmt.Fprint
 
+type RedirectionInfo struct {
+	outputFile     string
+	appendMode     bool
+	stdErrRedirect bool
+}
+
 func commandIdentifier(command string) {
 	formattedCommand := command[:len(command)-1]
 
 	splittedCommands := strings.Split(formattedCommand, " ")
 	firstCommand := splittedCommands[0]
 
+	outputFile, appendMode, stdErrRedirect, splittedCommands := parseRedirect(splittedCommands)
+
+	redirectionInfo := RedirectionInfo{
+		outputFile:     outputFile,
+		appendMode:     appendMode,
+		stdErrRedirect: stdErrRedirect,
+	}
+
+	if firstCommand == "exit" {
+		handleExit(splittedCommands, redirectionInfo)
+		return
+	} else if firstCommand == "echo" {
+		handleEcho(splittedCommands, redirectionInfo)
+		return
+	} else if firstCommand == "type" {
+		handleType(splittedCommands, redirectionInfo)
+		return
+	} else if firstCommand == "pwd" {
+		handlePwd(redirectionInfo)
+		return
+	} else if firstCommand == "cd" {
+		handleCd(splittedCommands, redirectionInfo)
+		return
+	} else {
+		handleExternalCommands(splittedCommands, redirectionInfo)
+		return
+	}
+}
+
+func parseRedirect(commands []string) (string, bool, bool, []string) {
 	var appendMode bool
 	var outputFile string
 	var stdErrRedirect bool
 
-	for i, arg := range splittedCommands {
+	for i, arg := range commands {
 		if arg == ">" || arg == "1>" || arg == "2>" || arg == ">>" || arg == "2>>" {
-			if i+1 < len(splittedCommands) {
-				outputFile = splittedCommands[i+1]
+			if i+1 < len(commands) {
+				outputFile = commands[i+1]
 				appendMode = arg == ">>" || arg == "2>>"
 				stdErrRedirect = arg == "2>" || arg == "2>>"
-				splittedCommands = splittedCommands[:i]
+				commands = commands[:i]
 				break
 			}
 		}
 	}
 
-	if firstCommand == "exit" && outputFile == "" {
-		handleExit(splittedCommands)
-		return
-	} else if firstCommand == "echo" && outputFile == "" {
-		handleEcho(splittedCommands)
-		return
-	} else if firstCommand == "type" && outputFile == "" {
-		handleType(splittedCommands)
-		return
-	} else if firstCommand == "pwd" && outputFile == "" {
-		handlePwd()
-		return
-	} else if firstCommand == "cd" && outputFile == "" {
-		handleCd(splittedCommands)
-		return
-	} else {
-		handleExternalCommands(splittedCommands, outputFile, appendMode, stdErrRedirect)
-		return
-	}
+	return outputFile, appendMode, stdErrRedirect, commands
 }
 
-func handleExit(commands []string) {
+func handleExit(commands []string, redirectionInfo RedirectionInfo) {
 	if commands[1] != "0" {
-		fmt.Println("exit: " + commands[1] + ": numeric argument required")
+		// fmt.Println("exit: " + commands[1] + ": numeric argument required")
+		output := "exit: " + commands[1] + ": numeric argument required"
+		handleOutput(output, redirectionInfo.outputFile, redirectionInfo, true)
 		os.Exit(2)
 		return
 	}
@@ -65,13 +85,13 @@ func handleExit(commands []string) {
 	return
 }
 
-func handleEcho(commands []string) {
+func handleEcho(commands []string, redirectionInfo RedirectionInfo) {
 	totalToPrint := strings.Join(commands, " ")[5:]
-	fmt.Println(totalToPrint)
+	handleOutput(totalToPrint, redirectionInfo.outputFile, redirectionInfo, false)
 	return
 }
 
-func handleType(commands []string) {
+func handleType(commands []string, redirectionInfo RedirectionInfo) {
 	knownCommands := []string{
 		"echo",
 		"exit",
@@ -82,30 +102,40 @@ func handleType(commands []string) {
 
 	commandToType := strings.Join(commands, " ")[5:]
 	if slices.Contains(knownCommands, commandToType) {
-		fmt.Println(commandToType + " is a shell builtin")
+		// fmt.Println(commandToType + " is a shell builtin")
+		output := commandToType + " is a shell builtin"
+		handleOutput(output, redirectionInfo.outputFile, redirectionInfo, false)
 		return
 	} else if path, err := exec.LookPath(commandToType); err == nil {
-		fmt.Println(commandToType + " is " + path)
+		// fmt.Println(commandToType + " is " + path)
+		output := commandToType + " is " + path
+		handleOutput(output, redirectionInfo.outputFile, redirectionInfo, false)
 		return
 	} else {
-		fmt.Println(commandToType + ": not found")
+		// fmt.Println(commandToType + ": not found")
+		output := commandToType + ": not found"
+		handleOutput(output, redirectionInfo.outputFile, redirectionInfo, true)
 		return
 	}
 }
 
-func handlePwd() {
+func handlePwd(redirectionInfo RedirectionInfo) {
 	dir, err := os.Getwd()
 	if err != nil {
-		fmt.Println("Error getting current directory:", err)
+		// fmt.Println("Error getting current directory:", err)
+		output := "Error getting current directory: " + err.Error()
+		handleOutput(output, redirectionInfo.outputFile, redirectionInfo, true)
 		return
 	}
 	fmt.Println(dir)
 	return
 }
 
-func handleCd(commands []string) {
+func handleCd(commands []string, redirectionInfo RedirectionInfo) {
 	if len(commands) > 2 {
-		fmt.Println("cd: too many arguments")
+		// fmt.Println("cd: too many arguments")
+		output := "cd: too many arguments"
+		handleOutput(output, redirectionInfo.outputFile, redirectionInfo, true)
 		return
 	}
 
@@ -118,26 +148,40 @@ func handleCd(commands []string) {
 
 	err := os.Chdir(targetDir)
 	if err != nil {
-		fmt.Println("cd: " + targetDir + ": No such file or directory")
+		// fmt.Println("cd: " + targetDir + ": No such file or directory")
+		output := "cd: " + targetDir + ": No such file or directory"
+		handleOutput(output, redirectionInfo.outputFile, redirectionInfo, true)
 	}
 }
 
-func handleExternalCommands(commands []string, outputFile string, appendMode bool, stdErrRedirect bool) {
+func handleExternalCommands(commands []string, redirectionInfo RedirectionInfo) {
 	_, err := exec.LookPath(commands[0])
 	if err != nil {
-		fmt.Println(commands[0] + ": command not found")
+		// fmt.Println(commands[0] + ": command not found")
+		output := commands[0] + ": command not found"
+		handleOutput(output, redirectionInfo.outputFile, redirectionInfo, true)
 		return
 	}
 
 	cmd := exec.Command(commands[0], commands[1:]...) // Execute the command with the rest of the arguments
+
+	if err := cmd.Run(); err != nil {
+		// fmt.Println("Error executing", commands[0], ":", err)
+		output := "Error executing " + commands[0] + ": " + err.Error()
+		handleOutput(output, redirectionInfo.outputFile, redirectionInfo, true)
+		return
+	}
+}
+
+func handleOutput(output string, outputFile string, redirectionInfo RedirectionInfo, isError bool) {
 	if outputFile != "" {
 		var file *os.File
 		var err error
 
-		if appendMode {
-			file, err = os.OpenFile(outputFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644) // Open the file in append mode if it exists or create it if it doesn't and write to it and 0644 is the permission for the file
+		if redirectionInfo.appendMode {
+			file, err = os.OpenFile(outputFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		} else {
-			file, err = os.Create(outputFile) // Create the file if it doesn't exist and write to it
+			file, err = os.Create(outputFile)
 		}
 
 		if err != nil {
@@ -145,24 +189,19 @@ func handleExternalCommands(commands []string, outputFile string, appendMode boo
 			return
 		}
 
-		defer file.Close() // Close the file after the function ends
+		defer file.Close()
 
-		if stdErrRedirect {
-			cmd.Stderr = file
-			cmd.Stdout = os.Stdout // Keep stdout unchanged
+		if isError {
+			file.WriteString(output)
 		} else {
-			cmd.Stdout = file
-			cmd.Stderr = os.Stderr // Keep stderr unchanged
+			fmt.Println(output)
 		}
-
 	} else {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-	}
-
-	if err := cmd.Run(); err != nil {
-		fmt.Println("Error executing", commands[0], ":", err)
-		return
+		if isError {
+			fmt.Println(output)
+		} else {
+			fmt.Println(output)
+		}
 	}
 }
 
