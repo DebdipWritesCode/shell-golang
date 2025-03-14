@@ -149,8 +149,10 @@ func handleExternalCommands(commands []string, outputFile string, appendMode boo
 
 		if stdErrRedirect {
 			cmd.Stderr = file
+			cmd.Stdout = os.Stdout // Keep stdout unchanged
 		} else {
 			cmd.Stdout = file
+			cmd.Stderr = os.Stderr // Keep stderr unchanged
 		}
 
 	} else {
