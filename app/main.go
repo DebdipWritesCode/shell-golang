@@ -21,10 +21,8 @@ type RedirectionInfo struct {
 func commandIdentifier(command string) {
 	formattedCommand := command[:len(command)-1]
 
-	splittedCommands := strings.Split(formattedCommand, " ")
+	splittedCommands := parseQuotes(formattedCommand)
 	firstCommand := splittedCommands[0]
-
-	splittedCommands = parseQuotes(formattedCommand)
 
 	outputFile, appendMode, stdErrRedirect, splittedCommands := parseRedirect(splittedCommands)
 
@@ -77,7 +75,7 @@ func parseRedirect(commands []string) (string, bool, bool, []string) {
 
 func parseQuotes(command string) []string {
 	if !strings.ContainsAny(command, `'"`) {
-		return strings.Split(command, " ")
+		return strings.Fields(command)
 	}
 
 	var result []string
