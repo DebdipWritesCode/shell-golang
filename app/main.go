@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 )
 
@@ -15,6 +16,12 @@ func main() {
 
 	// Wait for user input
 	// bufio.NewReader(os.Stdin).ReadString('\n')
+	knownCommands := []string{
+		"echo",
+		"exit",
+		"type",
+	}
+
 	for {
 		fmt.Fprint(os.Stdout, "$ ")
 		command, err := bufio.NewReader(os.Stdin).ReadString('\n')
@@ -29,9 +36,19 @@ func main() {
 			os.Exit(0)
 		}
 
-		if strings.Split(formattedCommand, " ")[0] == "echo" {
+		firstCommand := strings.Split(formattedCommand, " ")[0]
+
+		if firstCommand == "echo" {
 			fmt.Println(formattedCommand[5:])
 			continue
+		} else if firstCommand == "type" {
+			commandToType := formattedCommand[5:]
+			if slices.Contains(knownCommands, commandToType) {
+				fmt.Println(commandToType + " is a shell builtin")
+				continue
+			} else {
+				fmt.Println(commandToType + " not found")
+			}
 		}
 
 		fmt.Println(formattedCommand + ": command not found")
