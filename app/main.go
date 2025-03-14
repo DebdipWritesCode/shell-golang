@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 // Ensures gofmt doesn't remove the "fmt" import in stage 1 (feel free to remove this!)
@@ -26,6 +27,11 @@ func main() {
 
 		if formattedCommand == "exit 0" {
 			os.Exit(0)
+		}
+
+		if strings.Split(formattedCommand, " ")[0] == "echo" {
+			fmt.Println(formattedCommand[5:])
+			continue
 		}
 
 		fmt.Println(formattedCommand + ": command not found")
