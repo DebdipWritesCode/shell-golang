@@ -93,13 +93,16 @@ func handleCd(commands []string) {
 		return
 	}
 
-	if commands[1][0] == '/' {
-		err := os.Chdir(commands[1])
-		if err != nil {
-			fmt.Println("cd: " + commands[1] + ": No such file or directory")
-			return
-		}
-		return
+	targetDir := ""
+	if len(commands) == 1 {
+		targetDir, _ = os.UserHomeDir()
+	} else {
+		targetDir = commands[1]
+	}
+
+	err := os.Chdir(targetDir)
+	if err != nil {
+		fmt.Println("cd:", targetDir, ": No such file or directory")
 	}
 }
 
