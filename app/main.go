@@ -27,6 +27,9 @@ func commandIdentifier(command string) {
 	} else if firstCommand == "type" {
 		handleType(splittedCommands)
 		return
+	} else if firstCommand == "pwd" {
+		handlePwd()
+		return
 	} else {
 		handleExternalCommands(splittedCommands)
 		return
@@ -67,6 +70,16 @@ func handleType(commands []string) {
 		fmt.Println(commandToType + ": not found")
 		return
 	}
+}
+
+func handlePwd() {
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Error getting current directory:", err)
+		return
+	}
+	fmt.Println(dir)
+	return
 }
 
 func handleExternalCommands(commands []string) {
