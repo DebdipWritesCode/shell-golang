@@ -200,8 +200,8 @@ func handleExternalCommands(commands []string, redirectionInfo RedirectionInfo) 
 	}
 
 	if err := cmd.Run(); err != nil {
-		output := err.Error()
-		handleOutput(output, redirectionInfo.outputFile, redirectionInfo, true)
+		// output := err.Error()
+		// handleOutput(output, redirectionInfo.outputFile, redirectionInfo, true)
 		return
 	}
 }
