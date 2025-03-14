@@ -157,7 +157,6 @@ func handleCd(commands []string, redirectionInfo RedirectionInfo) {
 func handleExternalCommands(commands []string, redirectionInfo RedirectionInfo) {
 	_, err := exec.LookPath(commands[0])
 	if err != nil {
-		// fmt.Println(commands[0] + ": command not found")
 		output := commands[0] + ": command not found"
 		handleOutput(output, redirectionInfo.outputFile, redirectionInfo, true)
 		return
@@ -165,8 +164,35 @@ func handleExternalCommands(commands []string, redirectionInfo RedirectionInfo) 
 
 	cmd := exec.Command(commands[0], commands[1:]...) // Execute the command with the rest of the arguments
 
+	// Handle redirection if needed
+	var outputFile *os.File
+	if redirectionInfo.outputFile != "" {
+		flag := os.O_CREATE | os.O_WRONLY
+		if redirectionInfo.appendMode {
+			flag |= os.O_APPEND
+		} else {
+			flag |= os.O_TRUNC
+		}
+
+		outputFile, err = os.OpenFile(redirectionInfo.outputFile, flag, 0644)
+		if err != nil {
+			fmt.Println("Error opening file:", err)
+			return
+		}
+		defer outputFile.Close()
+
+		if redirectionInfo.stdErrRedirect {
+			cmd.Stderr = outputFile // Redirect stderr
+		} else {
+			cmd.Stdout = outputFile // Redirect stdout
+		}
+	} else {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	}
+
+	// Execute the command and check for errors
 	if err := cmd.Run(); err != nil {
-		// fmt.Println("Error executing", commands[0], ":", err)
 		output := "Error executing " + commands[0] + ": " + err.Error()
 		handleOutput(output, redirectionInfo.outputFile, redirectionInfo, true)
 		return
