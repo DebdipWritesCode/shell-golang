@@ -70,13 +70,13 @@ func handleType(commands []string) {
 }
 
 func handleExternalCommands(commands []string) {
-	path, err := exec.LookPath(commands[0])
+	_, err := exec.LookPath(commands[0])
 	if err != nil {
 		fmt.Println(commands[0] + ": command not found")
 		return
 	}
 
-	cmd := exec.Command(path, commands[1:]...) // Execute the command with the rest of the arguments
+	cmd := exec.Command(commands[0], commands[1:]...) // Execute the command with the rest of the arguments
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
