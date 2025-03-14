@@ -18,6 +18,22 @@ func commandIdentifier(command string) {
 	splittedCommands := strings.Split(formattedCommand, " ")
 	firstCommand := splittedCommands[0]
 
+	var appendMode bool
+	var outputFile string
+	var stdErrRedirect bool
+
+	for i, arg := range splittedCommands {
+		if arg == ">" || arg == "1>" || arg == "2>" || arg == ">>" || arg == "2>>" {
+			if i+1 < len(splittedCommands) {
+				outputFile = splittedCommands[i+1]
+				appendMode = arg == ">>" || arg == "2>>"
+				stdErrRedirect = arg == "2>" || arg == "2>>"
+				splittedCommands = splittedCommands[:i]
+				break
+			}
+		}
+	}
+
 	if firstCommand == "exit" {
 		handleExit(splittedCommands)
 		return
@@ -34,7 +50,7 @@ func commandIdentifier(command string) {
 		handleCd(splittedCommands)
 		return
 	} else {
-		handleExternalCommands(splittedCommands)
+		handleExternalCommands(splittedCommands, outputFile, appendMode, stdErrRedirect)
 		return
 	}
 }
@@ -106,7 +122,7 @@ func handleCd(commands []string) {
 	}
 }
 
-func handleExternalCommands(commands []string) {
+func handleExternalCommands(commands []string, outputFile string, appendMode bool, stdErrRedirect bool) {
 	_, err := exec.LookPath(commands[0])
 	if err != nil {
 		fmt.Println(commands[0] + ": command not found")
@@ -114,8 +130,33 @@ func handleExternalCommands(commands []string) {
 	}
 
 	cmd := exec.Command(commands[0], commands[1:]...) // Execute the command with the rest of the arguments
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	if outputFile != "" {
+		var file *os.File
+		var err error
+
+		if appendMode {
+			file, err = os.OpenFile(outputFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644) // Open the file in append mode if it exists or create it if it doesn't and write to it and 0644 is the permission for the file
+		} else {
+			file, err = os.Create(outputFile) // Create the file if it doesn't exist and write to it
+		}
+
+		if err != nil {
+			fmt.Println("Error opening file:", err)
+			return
+		}
+
+		defer file.Close() // Close the file after the function ends
+
+		if stdErrRedirect {
+			cmd.Stderr = file
+		} else {
+			cmd.Stdout = file
+		}
+
+	} else {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	}
 
 	if err := cmd.Run(); err != nil {
 		fmt.Println("Error executing", commands[0], ":", err)
