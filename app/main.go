@@ -76,6 +76,10 @@ func parseRedirect(commands []string) (string, bool, bool, []string) {
 }
 
 func parseQuotes(command string) []string {
+	if !strings.ContainsAny(command, `'"`) {
+		return strings.Split(command, " ")
+	}
+
 	var result []string
 	var token string
 
