@@ -24,6 +24,8 @@ func commandIdentifier(command string) {
 	splittedCommands := strings.Split(formattedCommand, " ")
 	firstCommand := splittedCommands[0]
 
+	splittedCommands = parseQuotes(formattedCommand)
+
 	outputFile, appendMode, stdErrRedirect, splittedCommands := parseRedirect(splittedCommands)
 
 	redirectionInfo := RedirectionInfo{
@@ -71,6 +73,47 @@ func parseRedirect(commands []string) (string, bool, bool, []string) {
 	}
 
 	return outputFile, appendMode, stdErrRedirect, commands
+}
+
+func parseQuotes(command string) []string {
+	var result []string
+	var token string
+
+	inSingleQuote, inDoubleQuote := false, false
+
+	for i := 0; i < len(command); i++ {
+		ch := command[i]
+
+		switch ch {
+		case '\'':
+			if !inDoubleQuote {
+				inSingleQuote = !inSingleQuote
+			} else {
+				token += string(ch)
+			}
+		case '"':
+			if !inSingleQuote {
+				inDoubleQuote = !inDoubleQuote
+			} else {
+				token += string(ch)
+			}
+		case ' ':
+			if inSingleQuote || inDoubleQuote {
+				token += string(ch)
+			} else {
+				result = append(result, token)
+				token = ""
+			}
+		default:
+			token += string(ch)
+		}
+	}
+
+	if token != "" {
+		result = append(result, token)
+	}
+
+	return result
 }
 
 func handleExit(commands []string, redirectionInfo RedirectionInfo) {
