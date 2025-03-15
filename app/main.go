@@ -138,6 +138,8 @@ func parseQuotes(command string) []string {
 				token += string(ch)
 				result = append(result, token)
 				token = ""
+			} else {
+				result[len(result)-1] += string(ch)
 			}
 		} else if ch == '\\' {
 			if i+1 < len(command) {
