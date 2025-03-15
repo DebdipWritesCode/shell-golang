@@ -115,7 +115,9 @@ func parseQuotes(command string) []string {
 			if inSingleQuote == 1 || inDoubleQuote == 1 {
 				token += string(ch)
 			} else if token != "" {
-				token += string(" ")
+				if i+1 < len(command) && command[i+1] == ' ' {
+					token += string(" ")
+				}
 				result = append(result, token)
 				token = ""
 			}
