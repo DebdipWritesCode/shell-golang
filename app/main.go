@@ -252,6 +252,13 @@ func handleExternalCommands(commands []string, redirectionInfo RedirectionInfo) 
 		return
 	}
 
+	for i, command := range commands {
+		if command == ">" || command == "1>" || command == "2>" || command == ">>" || command == "1>>" || command == "2>>" {
+			commands = commands[:i]
+			break
+		}
+	}
+
 	cmd := exec.Command(commands[0], commands[1:]...) // Execute the command with the rest of the arguments
 
 	// Handle redirection if needed
