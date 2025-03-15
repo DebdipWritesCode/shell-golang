@@ -24,6 +24,8 @@ func commandIdentifier(command string) {
 	splittedCommands := parseQuotes(formattedCommand)
 	firstCommand := splittedCommands[0]
 
+	strings.TrimSpace(firstCommand)
+
 	outputFile, appendMode, stdErrRedirect, splittedCommands := parseRedirect(splittedCommands)
 
 	redirectionInfo := RedirectionInfo{
