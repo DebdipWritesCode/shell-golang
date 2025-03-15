@@ -36,7 +36,7 @@ func commandIdentifier(command string) {
 		handleExit(splittedCommands, redirectionInfo)
 		return
 	} else if firstCommand == "echo" {
-		handleEcho(command, redirectionInfo)
+		handleEcho(formattedCommand, redirectionInfo)
 		return
 	} else if firstCommand == "type" {
 		handleType(splittedCommands, redirectionInfo)
