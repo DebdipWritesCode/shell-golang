@@ -363,13 +363,13 @@ func handleOutput(output string, outputFile string, redirectionInfo RedirectionI
 func autoComplete(line string) []string {
 	var suggestions []string
 
+	suggestions = append(suggestions, getExecutablesFromPath(line)...)
+
 	for _, cmd := range builtInCommands {
 		if strings.HasPrefix(cmd, line) {
 			suggestions = append(suggestions, cmd)
 		}
 	}
-
-	suggestions = append(suggestions, getExecutablesFromPath(line)...)
 
 	return suggestions
 }
