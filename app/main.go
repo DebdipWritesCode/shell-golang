@@ -369,7 +369,30 @@ func autoComplete(line string) []string {
 		}
 	}
 
+	suggestions = append(suggestions, getExecutablesFromPath(line)...)
+
 	return suggestions
+}
+
+func getExecutablesFromPath(prefix string) []string {
+	var matches []string
+
+	pathDirs := strings.Split(os.Getenv("PATH"), string(os.PathListSeparator))
+
+	for _, dir := range pathDirs {
+		files, err := os.ReadDir(dir)
+		if err != nil {
+			continue // Skip directories we can't read
+		}
+
+		for _, file := range files {
+			if !file.IsDir() && strings.HasPrefix(file.Name(), prefix) {
+				matches = append(matches, file.Name())
+			}
+		}
+	}
+
+	return matches
 }
 
 func getTermios(fd int) (*syscall.Termios, error) {
