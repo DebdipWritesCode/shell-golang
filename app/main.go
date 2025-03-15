@@ -92,6 +92,9 @@ func parseQuotes(command string) []string {
 				if inSingleQuote == 0 {
 					inSingleQuote++
 				} else {
+					if i+1 < len(command) && command[i+1] == ' ' {
+						token += string(" ")
+					}
 					result = append(result, token)
 					token = ""
 					inSingleQuote = 0
@@ -104,6 +107,9 @@ func parseQuotes(command string) []string {
 				if inDoubleQuote == 0 {
 					inDoubleQuote++
 				} else {
+					if i+1 < len(command) && command[i+1] == ' ' {
+						token += string(" ")
+					}
 					result = append(result, token)
 					token = ""
 					inDoubleQuote = 0
@@ -141,7 +147,7 @@ func handleExit(commands []string, redirectionInfo RedirectionInfo) {
 }
 
 func handleEcho(commands []string, redirectionInfo RedirectionInfo) {
-	output := strings.Join(commands[1:], " ")
+	output := strings.Join(commands[1:], "")
 
 	handleOutput(output, redirectionInfo.outputFile, redirectionInfo, false)
 	return
