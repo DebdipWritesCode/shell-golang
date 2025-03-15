@@ -58,6 +58,8 @@ func parseRedirect(commands []string) (string, bool, bool, []string) {
 	var outputFile string
 	var stdErrRedirect bool
 
+	trimCommands(commands)
+
 	for i, arg := range commands {
 		if arg == ">" || arg == "1>" || arg == "2>" || arg == ">>" || arg == "1>>" || arg == "2>>" {
 			if i+1 < len(commands) {
@@ -271,7 +273,7 @@ func handleExternalCommands(commands []string, redirectionInfo RedirectionInfo) 
 
 		outputFile, err = os.OpenFile(redirectionInfo.outputFile, flag, 0644)
 		if err != nil {
-			fmt.Println("Error opening file:", err)
+			handleOutput(err.Error(), redirectionInfo.outputFile, redirectionInfo, true)
 			return
 		}
 		defer outputFile.Close()
