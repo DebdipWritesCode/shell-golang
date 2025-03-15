@@ -1,12 +1,13 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
 	"slices"
 	"strings"
+	"syscall"
+	"unsafe"
 )
 
 // Ensures gofmt doesn't remove the "fmt" import in stage 1 (feel free to remove this!)
@@ -18,10 +19,16 @@ type RedirectionInfo struct {
 	stdErrRedirect bool
 }
 
-func commandIdentifier(command string) {
-	formattedCommand := command[:len(command)-1]
+var builtInCommands = []string{
+	"exit",
+	"echo",
+	"type",
+	"pwd",
+	"cd",
+}
 
-	splittedCommands := parseQuotes(formattedCommand)
+func commandIdentifier(command string) {
+	splittedCommands := parseQuotes(command)
 	firstCommand := splittedCommands[0]
 
 	firstCommand = strings.TrimSpace(firstCommand)
@@ -191,14 +198,12 @@ func handleExit(commands []string, redirectionInfo RedirectionInfo) {
 		return
 	}
 	os.Exit(0)
-	return
 }
 
 func handleEcho(commands []string, redirectionInfo RedirectionInfo) {
 	output := strings.Join(commands[1:], "")
 
 	handleOutput(output, redirectionInfo.outputFile, redirectionInfo, false)
-	return
 }
 
 func handleType(commands []string, redirectionInfo RedirectionInfo) {
@@ -239,7 +244,6 @@ func handlePwd(redirectionInfo RedirectionInfo) {
 		return
 	}
 	fmt.Println(dir)
-	return
 }
 
 func handleCd(commands []string, redirectionInfo RedirectionInfo) {
@@ -356,20 +360,122 @@ func handleOutput(output string, outputFile string, redirectionInfo RedirectionI
 	}
 }
 
+func autoComplete(line string) []string {
+	var suggestions []string
+
+	for _, cmd := range builtInCommands {
+		if strings.HasPrefix(cmd, line) {
+			suggestions = append(suggestions, cmd)
+		}
+	}
+
+	return suggestions
+}
+
+func getTermios(fd int) (*syscall.Termios, error) {
+	var t syscall.Termios
+	_, _, errno := syscall.Syscall6(syscall.SYS_IOCTL, uintptr(fd), uintptr(syscall.TCGETS), uintptr(unsafe.Pointer(&t)), 0, 0, 0)
+	if errno != 0 {
+		return nil, errno
+	}
+	return &t, nil
+}
+
+// Set terminal attributes
+func setTermios(fd int, t *syscall.Termios) error {
+	_, _, errno := syscall.Syscall6(syscall.SYS_IOCTL, uintptr(fd), uintptr(syscall.TCSETS), uintptr(unsafe.Pointer(t)), 0, 0, 0)
+	if errno != 0 {
+		return errno
+	}
+	return nil
+}
+
 func main() {
 	// Uncomment this block to pass the first stage
 
 	// Wait for user input
 	// bufio.NewReader(os.Stdin).ReadString('\n')
+	// status := 0
 
 	for {
 		fmt.Fprint(os.Stdout, "$ ")
-		command, err := bufio.NewReader(os.Stdin).ReadString('\n')
+
+		fd := int(os.Stdin.Fd()) // Get the file descriptor for the standard input
+
+		originalTermios, err := getTermios(fd)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "Error reading input:", err)
+			fmt.Fprintln(os.Stderr, "Error getting terminal attributes:", err)
 			os.Exit(1)
 		}
+		defer setTermios(fd, originalTermios)
 
-		commandIdentifier(command)
+		raw := *originalTermios
+		raw.Lflag &^= syscall.ECHO | syscall.ICANON // Disable echo and canonical mode
+		raw.Cc[syscall.VMIN] = 1                    // Minimum number of characters to read
+		raw.Cc[syscall.VTIME] = 0                   // No timeout
+		if err := setTermios(fd, &raw); err != nil {
+			fmt.Println("Error setting terminal to raw mode:", err)
+			return
+		}
+
+		buffer := make([]byte, 1)       // Buffer to read a single byte
+		input_buffer := make([]byte, 0) // Buffer to store the input
+		splt_input := []string{}
+		tab_pressed := false
+		for {
+			_, err := os.Stdin.Read(buffer)
+			if err != nil {
+				fmt.Println("Error reading input: ", err)
+				break
+			}
+
+			if buffer[0] == '\t' {
+				if len(input_buffer) == 0 {
+					continue
+				}
+				splt_input = strings.Split(string(input_buffer), " ")
+				suggestions := autoComplete(splt_input[0])
+
+				if len(suggestions) == 0 {
+					tab_pressed = false
+					fmt.Print("\a") // Beep sound suggesting no suggestions
+				} else if len(suggestions) == 1 {
+					tab_pressed = false
+					input_buffer = []byte(suggestions[0] + " ")
+					fmt.Print("\r\x1b[K") // This clears the line
+					fmt.Printf("$ %s", input_buffer)
+				} else if len(suggestions) > 1 {
+					// To be done
+				}
+			} else if buffer[0] == '\n' {
+				fmt.Print("\n")
+				splt_input = strings.Split(string(input_buffer), " ")
+				commandIdentifier(string(input_buffer))
+				break
+			} else if buffer[0] == '\x7f' { // Backspace
+				tab_pressed = false
+				if len(input_buffer) > 0 {
+					fmt.Print("\r\x1b[K") // This clears the line
+					fmt.Printf("$ %s", input_buffer)
+				} else if tab_pressed {
+					// To be done
+				}
+			} else {
+				tab_pressed = false
+				input_buffer = append(input_buffer, buffer[0])
+				fmt.Printf("%s", string(buffer[0]))
+			}
+		}
 	}
+
+	// for {
+	// 	fmt.Fprint(os.Stdout, "$ ")
+	// 	command, err := bufio.NewReader(os.Stdin).ReadString('\n')
+	// 	if err != nil {
+	// 		fmt.Fprintln(os.Stderr, "Error reading input:", err)
+	// 		os.Exit(1)
+	// 	}
+
+	// 	commandIdentifier(command)
+	// }
 }
