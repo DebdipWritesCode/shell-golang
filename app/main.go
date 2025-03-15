@@ -142,10 +142,32 @@ func handleExit(commands []string, redirectionInfo RedirectionInfo) {
 
 func handleEcho(command string, redirectionInfo RedirectionInfo) {
 	// totalToPrint := strings.Join(commands, " ")[5:]
-	totalToPrint := strings.ReplaceAll(command[5:], "\"", "")
-	totalToPrint = strings.ReplaceAll(totalToPrint, `'`, "")
+	rawText := command[5:]
 
-	handleOutput(totalToPrint, redirectionInfo.outputFile, redirectionInfo, false)
+	var result strings.Builder
+	inSingleQuote, inDoubleQuote := false, false
+	spaceBuffer := false
+
+	for _, ch := range rawText {
+		switch ch {
+		case '\'':
+			inSingleQuote = !inSingleQuote
+		case '"':
+			inDoubleQuote = !inDoubleQuote
+		case ' ':
+			if inSingleQuote || inDoubleQuote {
+				result.WriteRune(ch) // Keep spaces inside quotes
+			} else if !spaceBuffer { // Collapse multiple spaces outside quotes
+				result.WriteRune(ch)
+				spaceBuffer = true
+			}
+		default:
+			result.WriteRune(ch)
+			spaceBuffer = false
+		}
+	}
+
+	handleOutput(result.String(), redirectionInfo.outputFile, redirectionInfo, false)
 	return
 }
 
