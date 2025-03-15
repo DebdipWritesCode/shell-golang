@@ -258,11 +258,9 @@ func handleExternalCommands(commands []string, redirectionInfo RedirectionInfo) 
 			break
 		}
 	}
-
-	cmd := exec.Command(commands[0], commands[1:]...) // Execute the command with the rest of the arguments
-
 	// Handle redirection if needed
 	var outputFile *os.File
+
 	if redirectionInfo.outputFile != "" {
 		flag := os.O_CREATE | os.O_WRONLY
 		if redirectionInfo.appendMode {
@@ -277,7 +275,11 @@ func handleExternalCommands(commands []string, redirectionInfo RedirectionInfo) 
 			return
 		}
 		defer outputFile.Close()
+	}
 
+	cmd := exec.Command(commands[0], commands[1:]...) // Execute the command with the rest of the arguments
+
+	if redirectionInfo.outputFile != "" {
 		if redirectionInfo.stdErrRedirect {
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = outputFile // Redirect stderr
