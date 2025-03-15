@@ -151,6 +151,7 @@ func parseQuotes(command string) []string {
 					if command[i+1] == '\\' || command[i+1] == '"' || command[i+1] == '$' {
 						token += string(command[i+1])
 						i++
+						continue
 					} else {
 						token += string(ch)
 					}
