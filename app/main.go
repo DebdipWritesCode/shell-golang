@@ -125,6 +125,8 @@ func parseQuotes(command string) []string {
 		result = append(result, token)
 	}
 
+	fmt.Println(result)
+
 	return result
 }
 
@@ -141,7 +143,7 @@ func handleExit(commands []string, redirectionInfo RedirectionInfo) {
 }
 
 func handleEcho(commands []string, redirectionInfo RedirectionInfo) {
-	output := strings.Join(commands[5:], "")
+	output := strings.Join(commands[1:], " ")
 
 	handleOutput(output, redirectionInfo.outputFile, redirectionInfo, false)
 	return
