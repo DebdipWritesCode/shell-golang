@@ -190,7 +190,7 @@ func trimCommands(commands []string) {
 
 func handleExit(commands []string, redirectionInfo RedirectionInfo) {
 	trimCommands(commands)
-	if commands[1] != "0" {
+	if commands[2] != "0" {
 		// fmt.Println("exit: " + commands[1] + ": numeric argument required")
 		output := "exit: " + commands[1] + ": numeric argument required"
 		handleOutput(output, redirectionInfo.outputFile, redirectionInfo, true)
@@ -456,6 +456,7 @@ func main() {
 				tab_pressed = false
 				if len(input_buffer) > 0 {
 					fmt.Print("\r\x1b[K") // This clears the line
+					input_buffer = input_buffer[:len(input_buffer)-1]
 					fmt.Printf("$ %s", input_buffer)
 				} else if tab_pressed {
 					// To be done
