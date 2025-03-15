@@ -139,7 +139,14 @@ func parseQuotes(command string) []string {
 	return result
 }
 
+func trimCommands(commands []string) {
+	for i, command := range commands {
+		commands[i] = strings.TrimSpace(command)
+	}
+}
+
 func handleExit(commands []string, redirectionInfo RedirectionInfo) {
+	trimCommands(commands)
 	if commands[1] != "0" {
 		// fmt.Println("exit: " + commands[1] + ": numeric argument required")
 		output := "exit: " + commands[1] + ": numeric argument required"
@@ -166,6 +173,7 @@ func handleType(commands []string, redirectionInfo RedirectionInfo) {
 		"pwd",
 		"cd",
 	}
+	trimCommands(commands)
 
 	commandToType := strings.Join(commands, " ")[5:]
 	if slices.Contains(knownCommands, commandToType) {
@@ -199,6 +207,7 @@ func handlePwd(redirectionInfo RedirectionInfo) {
 }
 
 func handleCd(commands []string, redirectionInfo RedirectionInfo) {
+	trimCommands(commands)
 	if len(commands) > 2 {
 		// fmt.Println("cd: too many arguments")
 		output := "cd: too many arguments"
@@ -222,6 +231,7 @@ func handleCd(commands []string, redirectionInfo RedirectionInfo) {
 }
 
 func handleExternalCommands(commands []string, redirectionInfo RedirectionInfo) {
+	trimCommands(commands)
 	_, err := exec.LookPath(commands[0])
 	if err != nil {
 		output := commands[0] + ": command not found"
