@@ -88,8 +88,16 @@ func parseQuotes(command string) []string {
 				if inSingleQuote == 0 {
 					inSingleQuote++
 				} else {
-					if i+1 < len(command) && command[i+1] == ' ' {
-						token += string(" ")
+					if i+1 < len(command) {
+						if command[i+1] == '\'' {
+							i++
+							continue
+						} else if command[i+1] == '"' {
+							inDoubleQuote++
+							inSingleQuote = 0
+							i++
+							continue
+						}
 					}
 					result = append(result, token)
 					token = ""
@@ -103,8 +111,16 @@ func parseQuotes(command string) []string {
 				if inDoubleQuote == 0 {
 					inDoubleQuote++
 				} else {
-					if i+1 < len(command) && command[i+1] == ' ' {
-						token += string(" ")
+					if i+1 < len(command) {
+						if command[i+1] == '"' {
+							i++
+							continue
+						} else if command[i+1] == '\'' {
+							inDoubleQuote = 0
+							inSingleQuote++
+							i++
+							continue
+						}
 					}
 					result = append(result, token)
 					token = ""
@@ -115,7 +131,7 @@ func parseQuotes(command string) []string {
 			if inSingleQuote == 1 || inDoubleQuote == 1 {
 				token += string(ch)
 			} else if token != "" {
-				token += string(" ")
+				token += string(ch)
 				result = append(result, token)
 				token = ""
 			}
