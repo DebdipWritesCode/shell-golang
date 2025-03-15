@@ -74,10 +74,6 @@ func parseRedirect(commands []string) (string, bool, bool, []string) {
 }
 
 func parseQuotes(command string) []string {
-	if !strings.ContainsAny(command, `'"`) {
-		return strings.Fields(command)
-	}
-
 	var result []string
 	var token string
 	inSingleQuote, inDoubleQuote := 0, 0
@@ -119,6 +115,7 @@ func parseQuotes(command string) []string {
 			if inSingleQuote == 1 || inDoubleQuote == 1 {
 				token += string(ch)
 			} else if token != "" {
+				token += string(" ")
 				result = append(result, token)
 				token = ""
 			}
