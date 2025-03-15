@@ -36,7 +36,7 @@ func commandIdentifier(command string) {
 		handleExit(splittedCommands, redirectionInfo)
 		return
 	} else if firstCommand == "echo" {
-		handleEcho(splittedCommands, redirectionInfo)
+		handleEcho(command, redirectionInfo)
 		return
 	} else if firstCommand == "type" {
 		handleType(splittedCommands, redirectionInfo)
@@ -140,8 +140,10 @@ func handleExit(commands []string, redirectionInfo RedirectionInfo) {
 	return
 }
 
-func handleEcho(commands []string, redirectionInfo RedirectionInfo) {
-	totalToPrint := strings.Join(commands, " ")[5:]
+func handleEcho(command string, redirectionInfo RedirectionInfo) {
+	// totalToPrint := strings.Join(commands, " ")[5:]
+	totalToPrint := strings.ReplaceAll(command[5:], "\"", "")
+	totalToPrint = strings.ReplaceAll(totalToPrint, `'`, "")
 
 	handleOutput(totalToPrint, redirectionInfo.outputFile, redirectionInfo, false)
 	return
