@@ -125,8 +125,6 @@ func parseQuotes(command string) []string {
 		result = append(result, token)
 	}
 
-	fmt.Println(result)
-
 	return result
 }
 
