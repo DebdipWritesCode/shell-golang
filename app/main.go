@@ -100,6 +100,8 @@ func parseQuotes(command string) []string {
 							inSingleQuote = 0
 							i++
 							continue
+						} else if command[i+1] == ' ' {
+							token += string(" ")
 						}
 					}
 					result = append(result, token)
@@ -123,6 +125,8 @@ func parseQuotes(command string) []string {
 							inSingleQuote++
 							i++
 							continue
+						} else if command[i+1] == ' ' {
+							token += string(" ")
 						}
 					}
 					result = append(result, token)
