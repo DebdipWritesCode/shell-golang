@@ -60,9 +60,8 @@ func parseRedirect(commands []string) (string, bool, bool, []string) {
 	var outputFile string
 	var stdErrRedirect bool
 
-	trimCommands(commands)
-
 	for i, arg := range commands {
+		arg = strings.TrimSpace(arg)
 		if arg == ">" || arg == "1>" || arg == "2>" || arg == ">>" || arg == "1>>" || arg == "2>>" {
 			if i+1 < len(commands) {
 				outputFile = commands[i+1]
@@ -130,8 +129,6 @@ func parseQuotes(command string) []string {
 							continue
 						} else if command[i+1] == ' ' {
 							token += string(" ")
-							i++
-							continue
 						}
 					}
 					result = append(result, token)
