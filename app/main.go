@@ -122,6 +122,11 @@ func parseQuotes(command string) []string {
 				result = append(result, token)
 				token = ""
 			}
+		} else if ch == '\\' {
+			if i+1 < len(command) {
+				token += string(command[i+1])
+				i++
+			}
 		} else {
 			token += string(ch)
 		}
