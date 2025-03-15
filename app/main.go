@@ -36,7 +36,7 @@ func commandIdentifier(command string) {
 		handleExit(splittedCommands, redirectionInfo)
 		return
 	} else if firstCommand == "echo" {
-		handleEcho(formattedCommand, redirectionInfo)
+		handleEcho(splittedCommands, redirectionInfo)
 		return
 	} else if firstCommand == "type" {
 		handleType(splittedCommands, redirectionInfo)
@@ -92,6 +92,9 @@ func parseQuotes(command string) []string {
 				if inSingleQuote == 0 {
 					inSingleQuote++
 				} else {
+					if i+1 < len(command) && command[i+1] == ' ' {
+						token += string(" ")
+					}
 					result = append(result, token)
 					token = ""
 					inSingleQuote = 0
@@ -104,6 +107,9 @@ func parseQuotes(command string) []string {
 				if inDoubleQuote == 0 {
 					inDoubleQuote++
 				} else {
+					if i+1 < len(command) && command[i+1] == ' ' {
+						token += string(" ")
+					}
 					result = append(result, token)
 					token = ""
 					inDoubleQuote = 0
@@ -140,34 +146,10 @@ func handleExit(commands []string, redirectionInfo RedirectionInfo) {
 	return
 }
 
-func handleEcho(command string, redirectionInfo RedirectionInfo) {
-	// totalToPrint := strings.Join(commands, " ")[5:]
-	rawText := command[5:]
+func handleEcho(commands []string, redirectionInfo RedirectionInfo) {
+	output := strings.Join(commands[5:], "")
 
-	var result strings.Builder
-	inSingleQuote, inDoubleQuote := false, false
-	spaceBuffer := false
-
-	for _, ch := range rawText {
-		switch ch {
-		case '\'':
-			inSingleQuote = !inSingleQuote
-		case '"':
-			inDoubleQuote = !inDoubleQuote
-		case ' ':
-			if inSingleQuote || inDoubleQuote {
-				result.WriteRune(ch) // Keep spaces inside quotes
-			} else if !spaceBuffer { // Collapse multiple spaces outside quotes
-				result.WriteRune(ch)
-				spaceBuffer = true
-			}
-		default:
-			result.WriteRune(ch)
-			spaceBuffer = false
-		}
-	}
-
-	handleOutput(result.String(), redirectionInfo.outputFile, redirectionInfo, false)
+	handleOutput(output, redirectionInfo.outputFile, redirectionInfo, false)
 	return
 }
 
