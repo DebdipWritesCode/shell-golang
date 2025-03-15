@@ -143,9 +143,20 @@ func parseQuotes(command string) []string {
 				token = ""
 			}
 		} else if ch == '\\' {
-			if inDoubleQuote == 1 || inSingleQuote == 1 {
+			if inSingleQuote == 1 {
 				token += string(ch)
 				continue
+			} else if inDoubleQuote == 1 {
+				if i+1 < len(command) {
+					if command[i+1] == '\\' || command[i+1] == '"' || command[i+1] == '$' {
+						token += string(command[i+1])
+						i++
+					} else {
+						token += string(ch)
+					}
+				} else {
+					token += string(ch)
+				}
 			}
 			if i+1 < len(command) {
 				token += string(command[i+1])
