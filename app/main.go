@@ -469,6 +469,7 @@ func main() {
 					fmt.Printf("$ %s", input_buffer)
 				} else if len(suggestions) > 1 {
 					if tab_pressed {
+						fmt.Println()
 						for _, suggestion := range suggestions {
 							fmt.Printf("%s  ", suggestion)
 						}
