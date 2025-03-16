@@ -402,19 +402,14 @@ func longestCommonPrefix(strs []string) string {
 		}
 	}
 
-	// Check if prefix is the longest match (no suggestion is longer than it)
-	isFinalMatch := true
-	for _, str := range strs {
-		if strings.HasPrefix(str, prefix) && len(str) > len(prefix) {
-			isFinalMatch = false
-			break
+	for i, str := range strs {
+		if str == prefix {
+			if i == len(strs)-1 || strings.HasPrefix(strs[i+1], prefix) {
+				prefix = prefix + " "
+			}
 		}
 	}
 
-	// Append space only if it's the longest possible completion
-	if isFinalMatch {
-		return prefix + " "
-	}
 	return prefix
 }
 
