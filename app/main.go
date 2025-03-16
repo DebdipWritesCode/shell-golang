@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"slices"
+	"sort"
 	"strings"
 	"syscall"
 	"unsafe"
@@ -360,22 +361,8 @@ func handleOutput(output string, outputFile string, redirectionInfo RedirectionI
 	}
 }
 
-func autoComplete(line string) []string {
-	var suggestions []string
-
-	suggestions = append(suggestions, getExecutablesFromPath(line)...)
-
-	for _, cmd := range builtInCommands {
-		if strings.HasPrefix(cmd, line) {
-			suggestions = append(suggestions, cmd)
-		}
-	}
-
-	return suggestions
-}
-
 func getExecutablesFromPath(prefix string) []string {
-	var matches []string
+	matches := make(map[string]bool) // Use a map to avoid duplicates
 
 	pathDirs := strings.Split(os.Getenv("PATH"), string(os.PathListSeparator))
 
@@ -387,12 +374,40 @@ func getExecutablesFromPath(prefix string) []string {
 
 		for _, file := range files {
 			if !file.IsDir() && strings.HasPrefix(file.Name(), prefix) {
-				matches = append(matches, file.Name())
+				matches[file.Name()] = true
 			}
 		}
 	}
 
-	return matches
+	var uniqueMatches []string
+	for match := range matches {
+		uniqueMatches = append(uniqueMatches, match)
+	}
+
+	return uniqueMatches
+}
+
+func autoComplete(line string) []string {
+	suggestions := make(map[string]bool)
+
+	for _, cmd := range getExecutablesFromPath(line) {
+		suggestions[cmd] = true
+	}
+
+	for _, cmd := range builtInCommands {
+		if strings.HasPrefix(cmd, line) {
+			suggestions[cmd] = true
+		}
+	}
+
+	var uniqueSuggestions []string
+	for suggestion := range suggestions {
+		uniqueSuggestions = append(uniqueSuggestions, suggestion)
+	}
+
+	sort.Strings(uniqueSuggestions)
+
+	return uniqueSuggestions
 }
 
 func getTermios(fd int) (*syscall.Termios, error) {
