@@ -468,7 +468,9 @@ func main() {
 					fmt.Print("\r\x1b[K") // This clears the line
 					fmt.Printf("$ %s", input_buffer)
 				} else if len(suggestions) > 1 {
-					// To be done
+					input_buffer = []byte(suggestions[0] + " ")
+					fmt.Print("\r\x1b[K") // This clears the line
+					fmt.Printf("$ %s", input_buffer)
 				}
 			} else if buffer[0] == '\n' {
 				fmt.Print("\n")
