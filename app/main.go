@@ -429,9 +429,15 @@ func autoComplete(line string) []string {
 
 	sort.Strings(uniqueSuggestions)
 
-	commonPrefix := longestCommonPrefix(uniqueSuggestions)
-	if commonPrefix != line { // Auto-complete only if LCP is longer than current input
-		return []string{commonPrefix}
+	if len(uniqueSuggestions) > 1 {
+		commonPrefix := longestCommonPrefix(uniqueSuggestions)
+		if commonPrefix != line { // Auto-complete only if LCP is longer than current input
+			return []string{commonPrefix}
+		}
+	} else if len(uniqueSuggestions) == 1 {
+		if uniqueSuggestions[0] == line {
+			return []string{uniqueSuggestions[0] + " "}
+		}
 	}
 
 	return uniqueSuggestions
