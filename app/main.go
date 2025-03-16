@@ -402,6 +402,10 @@ func longestCommonPrefix(strs []string) string {
 		}
 	}
 
+	if strs[len(strs)-1] == prefix {
+		prefix += " "
+	}
+
 	return prefix
 }
 
@@ -425,11 +429,9 @@ func autoComplete(line string) []string {
 
 	sort.Strings(uniqueSuggestions)
 
-	if len(suggestions) > 1 {
-		commonPrefix := longestCommonPrefix(uniqueSuggestions)
-		if commonPrefix != line { // Auto-complete only if LCP is longer than current input
-			return []string{commonPrefix}
-		}
+	commonPrefix := longestCommonPrefix(uniqueSuggestions)
+	if commonPrefix != line { // Auto-complete only if LCP is longer than current input
+		return []string{commonPrefix}
 	}
 
 	return uniqueSuggestions
@@ -505,16 +507,16 @@ func main() {
 				} else if len(suggestions) == 1 {
 					tab_pressed = false
 
-					// toOutput := suggestions[0]
-					// for _, cmd := range builtInCommands {
-					// 	if cmd == toOutput {
-					// 		toOutput = toOutput + " "
-					// 		break
-					// 	}
-					// }
+					toOutput := suggestions[0]
+					for _, cmd := range builtInCommands {
+						if cmd == toOutput {
+							toOutput = toOutput + " "
+							break
+						}
+					}
 
-					input_buffer = []byte(suggestions[0] + " ") // Auto-complete with the only match
-					fmt.Print("\r\x1b[K")                       // Clears the line
+					input_buffer = []byte(toOutput) // Auto-complete with the only match
+					fmt.Print("\r\x1b[K")           // Clears the line
 					fmt.Printf("$ %s", input_buffer)
 				} else if len(suggestions) > 1 {
 					if tab_pressed {
