@@ -190,7 +190,7 @@ func trimCommands(commands []string) {
 
 func handleExit(commands []string, redirectionInfo RedirectionInfo) {
 	trimCommands(commands)
-	if commands[1] != "0" {
+	if commands[2] != "0" {
 		// fmt.Println("exit: " + commands[1] + ": numeric argument required")
 		output := "exit: " + commands[1] + ": numeric argument required"
 		handleOutput(output, redirectionInfo.outputFile, redirectionInfo, true)
@@ -464,13 +464,21 @@ func main() {
 					fmt.Print("\a") // Beep sound suggesting no suggestions
 				} else if len(suggestions) == 1 {
 					tab_pressed = false
-					input_buffer = []byte(suggestions[0] + " ")
+					input_buffer = []byte(suggestions[0])
 					fmt.Print("\r\x1b[K") // This clears the line
 					fmt.Printf("$ %s", input_buffer)
 				} else if len(suggestions) > 1 {
-					input_buffer = []byte(suggestions[0] + " ")
-					fmt.Print("\r\x1b[K") // This clears the line
-					fmt.Printf("$ %s", input_buffer)
+					if tab_pressed {
+						for _, suggestion := range suggestions {
+							fmt.Printf("%s  ", suggestion)
+						}
+						fmt.Println()
+						fmt.Printf("$ %s", input_buffer)
+						tab_pressed = false
+					} else {
+						tab_pressed = true
+						fmt.Print('\a')
+					}
 				}
 			} else if buffer[0] == '\n' {
 				fmt.Print("\n")
