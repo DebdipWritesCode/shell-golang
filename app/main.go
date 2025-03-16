@@ -403,7 +403,7 @@ func longestCommonPrefix(strs []string) string {
 	}
 
 	if strs[len(strs)-1] == prefix {
-		return prefix + " "
+		prefix += " "
 	}
 
 	return prefix
