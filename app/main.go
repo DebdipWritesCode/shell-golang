@@ -392,6 +392,8 @@ func longestCommonPrefix(strs []string) string {
 		return ""
 	}
 
+	fmt.Println(strs)
+
 	prefix := strs[0]
 	for _, str := range strs[1:] {
 		for strings.Index(str, prefix) != 0 {
