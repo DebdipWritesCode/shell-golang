@@ -402,13 +402,19 @@ func longestCommonPrefix(strs []string) string {
 		}
 	}
 
-	// If the LCP is a full command name (exact match with any suggestion), append a space
+	// Check if the prefix is the longest match (no other suggestion starts with it + extra characters)
+	isFinalMatch := true
 	for _, str := range strs {
-		if str == prefix {
-			return prefix + " "
+		if strings.HasPrefix(str, prefix) && str != prefix {
+			isFinalMatch = false
+			break
 		}
 	}
 
+	// Append space only if it's the longest possible completion
+	if isFinalMatch {
+		return prefix + " "
+	}
 	return prefix
 }
 
