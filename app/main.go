@@ -191,7 +191,7 @@ func trimCommands(commands []string) {
 
 func handleExit(commands []string, redirectionInfo RedirectionInfo) {
 	trimCommands(commands)
-	if commands[2] != "0" {
+	if commands[1] != "0" {
 		// fmt.Println("exit: " + commands[1] + ": numeric argument required")
 		output := "exit: " + commands[1] + ": numeric argument required"
 		handleOutput(output, redirectionInfo.outputFile, redirectionInfo, true)
