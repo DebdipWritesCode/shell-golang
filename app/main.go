@@ -464,8 +464,8 @@ func main() {
 					fmt.Print("\a") // Beep sound suggesting no suggestions
 				} else if len(suggestions) == 1 {
 					tab_pressed = false
-					input_buffer = []byte(suggestions[0])
-					fmt.Print("\r\x1b[K") // This clears the line
+					input_buffer = []byte(suggestions[0]) // Auto-complete with the only match
+					fmt.Print("\r\x1b[K")                 // Clears the line
 					fmt.Printf("$ %s", input_buffer)
 				} else if len(suggestions) > 1 {
 					if tab_pressed {
@@ -474,11 +474,11 @@ func main() {
 							fmt.Printf("%s  ", suggestion)
 						}
 						fmt.Println()
-						fmt.Printf("$ %s", input_buffer)
+						fmt.Printf("$ %s", input_buffer) // KEEP the original input buffer
 						tab_pressed = false
 					} else {
 						tab_pressed = true
-						fmt.Print('\a')
+						fmt.Print("\a") // Beep on first tab press
 					}
 				}
 			} else if buffer[0] == '\n' {
