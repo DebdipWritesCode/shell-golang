@@ -387,6 +387,23 @@ func getExecutablesFromPath(prefix string) []string {
 	return uniqueMatches
 }
 
+func longestCommonPrefix(strs []string) string {
+	if len(strs) == 0 {
+		return ""
+	}
+
+	prefix := strs[0]
+	for _, str := range strs[1:] {
+		for strings.Index(str, prefix) != 0 {
+			prefix = prefix[:len(prefix)-1]
+			if prefix == "" {
+				return ""
+			}
+		}
+	}
+	return prefix
+}
+
 func autoComplete(line string) []string {
 	suggestions := make(map[string]bool)
 
@@ -406,6 +423,13 @@ func autoComplete(line string) []string {
 	}
 
 	sort.Strings(uniqueSuggestions)
+
+	if len(suggestions) > 1 {
+		commonPrefix := longestCommonPrefix(uniqueSuggestions)
+		if commonPrefix != line { // Auto-complete only if LCP is longer than current input
+			return []string{commonPrefix}
+		}
+	}
 
 	return uniqueSuggestions
 }
