@@ -402,10 +402,6 @@ func longestCommonPrefix(strs []string) string {
 		}
 	}
 
-	if prefix == "xyz_foo_bar_baz" {
-		prefix += " "
-	}
-
 	return prefix
 }
 
@@ -509,16 +505,16 @@ func main() {
 				} else if len(suggestions) == 1 {
 					tab_pressed = false
 
-					toOutput := suggestions[0]
-					for _, cmd := range builtInCommands {
-						if cmd == toOutput {
-							toOutput = toOutput + " "
-							break
-						}
-					}
+					// toOutput := suggestions[0]
+					// for _, cmd := range builtInCommands {
+					// 	if cmd == toOutput {
+					// 		toOutput = toOutput + " "
+					// 		break
+					// 	}
+					// }
 
-					input_buffer = []byte(toOutput) // Auto-complete with the only match
-					fmt.Print("\r\x1b[K")           // Clears the line
+					input_buffer = []byte(suggestions[0] + " ") // Auto-complete with the only match
+					fmt.Print("\r\x1b[K")                       // Clears the line
 					fmt.Printf("$ %s", input_buffer)
 				} else if len(suggestions) > 1 {
 					if tab_pressed {
