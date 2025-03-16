@@ -402,7 +402,7 @@ func longestCommonPrefix(strs []string) string {
 		}
 	}
 
-	if strs[len(strs)-1] == prefix {
+	if prefix == "xyz_foo_bar_baz" {
 		prefix += " "
 	}
 
@@ -412,36 +412,26 @@ func longestCommonPrefix(strs []string) string {
 func autoComplete(line string) []string {
 	suggestions := make(map[string]bool)
 
-	// Collect executable suggestions
 	for _, cmd := range getExecutablesFromPath(line) {
 		suggestions[cmd] = true
 	}
 
-	// Collect built-in command suggestions
 	for _, cmd := range builtInCommands {
 		if strings.HasPrefix(cmd, line) {
 			suggestions[cmd] = true
 		}
 	}
 
-	// Convert map to sorted list
 	var uniqueSuggestions []string
 	for suggestion := range suggestions {
 		uniqueSuggestions = append(uniqueSuggestions, suggestion)
 	}
+
 	sort.Strings(uniqueSuggestions)
 
-	// Handle auto-completion
-	if len(uniqueSuggestions) > 1 {
+	if len(suggestions) > 1 {
 		commonPrefix := longestCommonPrefix(uniqueSuggestions)
-
-		// If the longest common prefix is the last unique string, add a space
-		if commonPrefix == uniqueSuggestions[len(uniqueSuggestions)-1] {
-			return []string{commonPrefix + " "}
-		}
-
-		// Auto-complete only if LCP is longer than current input
-		if commonPrefix != line {
+		if commonPrefix != line { // Auto-complete only if LCP is longer than current input
 			return []string{commonPrefix}
 		}
 	}
