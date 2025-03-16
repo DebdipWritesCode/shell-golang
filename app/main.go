@@ -401,6 +401,14 @@ func longestCommonPrefix(strs []string) string {
 			}
 		}
 	}
+
+	// If the LCP is a full command name (exact match with any suggestion), append a space
+	for _, str := range strs {
+		if str == prefix {
+			return prefix + " "
+		}
+	}
+
 	return prefix
 }
 
