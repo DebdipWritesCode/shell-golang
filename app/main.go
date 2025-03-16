@@ -371,8 +371,6 @@ func autoComplete(line string) []string {
 		}
 	}
 
-	fmt.Println(suggestions)
-
 	return suggestions
 }
 
