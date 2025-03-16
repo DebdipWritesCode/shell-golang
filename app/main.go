@@ -435,9 +435,7 @@ func autoComplete(line string) []string {
 			return []string{commonPrefix}
 		}
 	} else if len(uniqueSuggestions) == 1 {
-		if uniqueSuggestions[0] == line {
-			return []string{uniqueSuggestions[0] + " "}
-		}
+		return []string{uniqueSuggestions[0] + " "}
 	}
 
 	return uniqueSuggestions
