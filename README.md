@@ -1,34 +1,76 @@
-[![progress-banner](https://backend.codecrafters.io/progress/shell/960c592d-a733-470b-b1af-aa326ae630b5)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+# Custom Shell with Autocomplete and Redirection
 
-This is a starting point for Go solutions to the
-["Build Your Own Shell" Challenge](https://app.codecrafters.io/courses/shell/overview).
+## Overview
+This project is a custom shell implementation in Golang that supports various built-in commands, redirection features, proper string handling, and an intelligent autocomplete system.
 
-In this challenge, you'll build your own POSIX compliant shell that's capable of
-interpreting shell commands, running external programs and builtin commands like
-cd, pwd, echo and more. Along the way, you'll learn about shell command parsing,
-REPLs, builtin commands, and more.
+## Features
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+### 1. Built-in Commands
+The shell includes support for the following built-in commands:
+- **pwd** - Prints the current working directory.
+- **cd [directory]** - Changes the current directory.
+- **echo [text]** - Prints the given text, handling quotes and escape sequences correctly.
+- **exit** - Exits the shell.
 
-# Passing the first stage
+### 2. Input Handling
+- Proper handling of **strings, quotes**, and **escape sequences**.
+- Allows execution of both built-in and external commands.
 
-The entry point for your `shell` implementation is in `app/main.go`. Study and
-uncomment the relevant code, and push your changes to pass the first stage:
+### 3. Redirection Support
+The shell supports all common output and error redirections:
+- **Overwrite mode:**
+  - `command > file` (Redirect stdout to a file, overwriting if it exists.)
+  - `command 2> file` (Redirect stderr to a file, overwriting if it exists.)
+- **Append mode:**
+  - `command >> file` (Append stdout to a file.)
+  - `command 2>> file` (Append stderr to a file.)
+- **Both stdout and stderr:**
+  - `command &> file` (Redirect both stdout and stderr to a file.)
+  - `command &>> file` (Append both stdout and stderr to a file.)
+  
+### 4. Autocomplete Feature
+The shell implements an **autocomplete system** for command names when the user presses the `Tab` key.
+- If multiple commands match the given prefix, it completes to the **longest common prefix**.
+- If a single unique match is found, it completes the command automatically.
+- If the match is the longest possible valid command, a space is added after it.
 
-```sh
-git commit -am "pass 1st stage" # any msg
-git push origin master
+Example:
+```bash
+$ xyz_<TAB>        # Completes to xyz_foo
+$ xyz_foo_<TAB>    # Completes to xyz_foo_bar
+$ xyz_foo_bar_<TAB> # Completes to xyz_foo_bar_baz (with a space at the end)
 ```
 
-Time to move on to the next stage!
+### 5. Executable Handling
+- The shell searches for executables in the system `PATH`.
+- Supports both **built-in commands** and **external programs**.
+- Implements `longestCommonPrefix` logic for intelligent tab completion.
 
-# Stage 2 & beyond
+## Installation and Usage
+### 1. Clone the Repository
+```sh
+git clone https://github.com/DebdipWritesCode/shell-golang.git
+cd shell-golang
+cd app
+```
 
-Note: This section is for stages 2 and beyond.
+### 2. Build the Shell
+```sh
+go build -o my_shell main.go
+```
 
-1. Ensure you have `go (1.24)` installed locally
-1. Run `./your_program.sh` to run your program, which is implemented in
-   `app/main.go`.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+### 3. Run the Shell
+```sh
+./my_shell
+```
+
+## Future Enhancements
+- Implement **piping (`|`)** between commands.
+- Support for **background processes (`&`)**.
+- Enhanced **command history and navigation**.
+
+## Contributors
+- **Debdip Mukherjee** (@DebdipWritesCode)
+
+## License
+This project is licensed under the MIT License.
