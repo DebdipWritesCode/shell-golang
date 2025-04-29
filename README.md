@@ -1,4 +1,4 @@
-# Custom Shell with Autocomplete and Redirection
+# GoShell – Custom Shell with Autocomplete and Redirection
 
 ## Overview
 This project is a custom shell implementation in Golang that supports various built-in commands, redirection features, proper string handling, and an intelligent autocomplete system.
